@@ -2,6 +2,7 @@ package main
 
 import (
 	// "fmt"
+
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ func main() {
 		log.Fatal("PORT  was not found in the environment")
 	}
 
+
 	// Router Initialization
 	router := chi.NewRouter()
 	
@@ -27,6 +29,7 @@ func main() {
 		Handler: router,
 		Addr: ":" + port,
 	}
+
 
 	// CORS Initialization
 	router.Use(cors.Handler(cors.Options{
@@ -39,20 +42,19 @@ func main() {
 	}))
 
 	// New Router
-
 	v1Router := chi.NewRouter()
+	v1Router.Get("/healthz", handlerReadiness)
+	v1Router.Get("/err", handlerError)
 
-	v1Router.HandlerFunc("/ready", handlerReadiness)
-
+	router.Mount("/v1", v1Router)
 
 
 	// Server Start
+	log.Printf("Server starting on port: %v", port)
 	err := server.ListenAndServe()
-	log.Println("Server starting on port:", port)
+
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println("Server running on port:", port)
 }
